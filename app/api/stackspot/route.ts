@@ -33,8 +33,7 @@ export async function POST(req: NextRequest) {
     // Upload pré-assinado
     const { fileName } = body;
     const uploadRes = await fetch(
-      `
-https://data-integration-api.stackspot.com/v2/file-upload/form`,
+      `https://data-integration-api.stackspot.com/v2/file-upload/form`,
       {
         method: 'POST',
         headers: {
