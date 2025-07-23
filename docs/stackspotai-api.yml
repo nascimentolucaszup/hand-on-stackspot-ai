@@ -1,0 +1,209 @@
+openapi: 3.0.0
+info:
+  title: StackSpot AI Integration API
+  version: 1.0.0
+  description: API para autenticação, upload de arquivos e chat com agente StackSpot AI.
+
+servers:
+  - url: https://idm.stackspot.com/{realm}
+    description: StackSpot Identity Management
+    variables:
+      realm:
+        default: your-realm
+
+paths:
+  /oidc/oauth/token:
+    post:
+      summary: Autenticação via client credentials
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  example: client_credentials
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+              required:
+                - grant_type
+                - client_id
+                - client_secret
+      responses:
+        '200':
+          description: Token JWT retornado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+
+  /v2/file-upload/form:
+    post:
+      summary: Solicita upload de arquivo (pré-assinado)
+      servers:
+        - url: https://data-integration-api.stackspot.com
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  example: travel.png
+                target_type:
+                  type: string
+                  example: CONTEXT
+                expiration:
+                  type: integer
+                  example: 60
+              required:
+                - file_name
+                - target_type
+                - expiration
+      responses:
+        '200':
+          description: Dados para upload do arquivo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  url:
+                    type: string
+                  form:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      x-amz-algorithm:
+                        type: string
+                      x-amz-credential:
+                        type: string
+                      x-amz-date:
+                        type: string
+                      x-amz-security-token:
+                        type: string
+                      policy:
+                        type: string
+                      x-amz-signature:
+                        type: string
+
+  /v2/file-upload/s3-presigned-upload:
+    post:
+      summary: Upload real do arquivo para a URL S3 pré-assinada
+      description: |
+        Este endpoint representa o upload do arquivo para a URL S3 pré-assinada retornada pelo endpoint `/v2/file-upload/form`.
+        A URL, campos de formulário e headers são fornecidos na resposta do endpoint anterior.
+        O upload deve ser feito como um POST multipart/form-data para a URL informada, com os campos retornados e o arquivo.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                x-amz-algorithm:
+                  type: string
+                x-amz-credential:
+                  type: string
+                x-amz-date:
+                  type: string
+                x-amz-security-token:
+                  type: string
+                policy:
+                  type: string
+                x-amz-signature:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+              required:
+                - key
+                - x-amz-algorithm
+                - x-amz-credential
+                - x-amz-date
+                - x-amz-security-token
+                - policy
+                - x-amz-signature
+                - file
+      responses:
+        '204':
+          description: Upload realizado com sucesso (sem conteúdo)
+        '4XX':
+          description: Erro no upload
+      servers:
+        - url: https://{presigned-url}
+          description: URL S3 pré-assinada retornada pelo endpoint /v2/file-upload/form
+          variables:
+            presigned-url:
+              default: s3.amazonaws.com/bucket/...
+            
+  /v1/agent/{agent_id}/chat:
+    post:
+      summary: Envia prompt para o agente StackSpot AI
+      servers:
+        - url: https://genai-inference-app.stackspot.com
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+          example: 01JXADNTKPA48V8B2AVX7NAD64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                streaming:
+                  type: boolean
+                  example: false
+                user_prompt:
+                  type: string
+                  example: ""
+                stackspot_knowledge:
+                  type: boolean
+                  example: false
+                return_ks_in_response:
+                  type: boolean
+                  example: false
+                upload_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Resposta do agente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
