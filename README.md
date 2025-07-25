@@ -6,6 +6,12 @@ Este projeto é uma aplicação web desenvolvida em **Next.js** para upload, pro
 
 Permitir que usuários enviem documentos (PDF/PNG), processem com agentes inteligentes (StackSpot AI), visualizem e exportem os dados extraídos, visando automação e padronização de fluxos de extração de dados.
 
+## Vídeo de Demonstração
+
+[Link](https://drive.google.com/file/d/12H68-kukdCKfVA9JgtEq8pzkjMv6_Gk5/view?usp=drivesdk)
+
+> Se não for possível acessar falem comigo.
+
 ## 🚀 Tecnologias Utilizadas
 
 - [Next.js](https://nextjs.org/) (React, SSR/SSG)
@@ -49,6 +55,11 @@ Permitir que usuários enviem documentos (PDF/PNG), processem com agentes inteli
 
 5. **Acesse a aplicação:**
    - Abra [http://localhost:3000](http://localhost:3000) no navegador.
+
+  5.1 **bypass no chrome**
+  ```
+  google-chrome --disable-web-security --user-data-dir="/tmp/chrome-dev"
+  ```
 
 ## 🧩 Funcionalidades
 
@@ -106,4 +117,4 @@ Este projeto está sob a licença MIT.
 
 ---
 
-> Desenvolvido por [Lucas Ribeiro/SA] — [StackSpot AI](https://stackspot.com/)
+> Desenvolvido por [Lucas Ribeiro/SA (nascimento.lucas@zup.com.br)] — [StackSpot AI](https://stackspot.com/)
